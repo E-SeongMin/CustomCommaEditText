@@ -13,7 +13,7 @@
 
 ---
 
-## 📌 컴포즈에서는 Visual Transformation 을 활용하면 간단히 구현 가능
+## 📌 컴포즈에서는 VisualTransformation 을 상속받아 간단히 구현 가능
 
 ### 
 ```kotlin
