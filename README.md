@@ -13,18 +13,58 @@
 
 ---
 
-## 📌 사용 방법
+## 📌 컴포즈에서는 Visual Transformation 을 활용하면 간단히 구현 가능
 
-### XML 예시
-```xml
-<com.geek.customcommaedittext.CustomCommaEditText
-    android:id="@+id/commaEditText"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:inputType="number"
-    android:hint="숫자를 입력하세요" />
+### 
+```kotlin
+class DecimalMarkedNumberVisualTransformation(
+    val prefix: String
+) : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val defaultValue = "0"
+        val formattedText =
+            NumberUtil.convertNumberToDecimalMarkedString(
+                text.text
+                    .filter { "^[0-9]".toRegex().matches(it.toString()) }
+                    .ifEmpty { defaultValue }
+                    .toLong()
+            )
 
----
+        val offsetMapping = object : OffsetMapping {
+            val initSize = prefix.length + defaultValue.length
 
+            override fun originalToTransformed(offset: Int): Int {
+                val commas = formattedText.count { it == ',' }
+                return if (offset == 0) initSize else offset + commas + prefix.length
+            }
 
-## Compose에서 VisualTransformation 활용한 콤마 찍기 추가 공부!
+            override fun transformedToOriginal(offset: Int): Int {
+                val commas = formattedText.count { it == ',' }
+                return offset + commas + prefix.length
+            }
+        }
+
+        return TransformedText(
+            text = AnnotatedString("$prefix$formattedText"),
+            offsetMapping = offsetMapping
+        )
+    }
+}
+
+object NumberUtil {
+    fun convertNumberToDecimalMarkedString(number: Long): String {
+        return NumberFormat.getNumberInstance(Locale.getDefault()).format(number)
+    }
+}
+
+@Composable
+fun NumberTextField(
+	...
+) {
+    TextField(
+        ...
+        visualTransformation = DecimalMarkedNumberVisualTransformation("Some Prefix"),
+        ...
+    )
+}
+```
