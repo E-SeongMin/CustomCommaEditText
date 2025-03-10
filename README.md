@@ -23,3 +23,7 @@
     android:layout_height="wrap_content"
     android:inputType="number"
     android:hint="숫자를 입력하세요" />
+
+----------------------------------------------------------
+
+Compose에서 VisualTransformation 활용한 콤마 찍기 추가 예정
